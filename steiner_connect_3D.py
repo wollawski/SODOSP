@@ -636,16 +636,22 @@ def _add_view_buttons(fig, ax):
             print("[ViewButton] projection toggle not supported by this matplotlib version.")
 
     button_defs = [
-        ("Front", 0.08, 0.05, 0.14, 0.06, 0.0, -90.0),
-        ("Top", 0.24, 0.05, 0.14, 0.06, 90.0, -90.0),
-        ("Side", 0.40, 0.05, 0.14, 0.06, 0.0, 0.0),
-        ("Isometric", 0.56, 0.05, 0.14, 0.06, 30.0, -45.0),
-        ("Proj", 0.72, 0.05, 0.14, 0.06, None, None),
+        ("", 0.08, 0.05, 0.14, 0.06, 0.0, -90.0),
+        ("", 0.24, 0.05, 0.14, 0.06, 90.0, -90.0),
+        ("", 0.40, 0.05, 0.14, 0.06, 0.0, 0.0),
+        ("", 0.56, 0.05, 0.14, 0.06, 30.0, -45.0),
+        ("", 0.72, 0.05, 0.14, 0.06, None, None),
     ]
 
     for label, x, y, w, h, elev, azim in button_defs:
         ax_button = fig.add_axes([x, y, w, h])
+
+        ax_button.patch.set_alpha(0.0)
+
         button = Button(ax_button, label, hovercolor='#d9d9d9')
+
+        ax_button.set_frame_on(False)
+
         if label == "Proj":
             button.on_clicked(_toggle_projection)
         else:
