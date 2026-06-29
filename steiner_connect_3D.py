@@ -605,7 +605,7 @@ def _add_view_buttons(fig, ax):
 
     fig.subplots_adjust(bottom=0.15)
     buttons = []
-    proj_mode = {"type": "persp"}
+    proj_mode = {"type": "ortho"}
 
     def _set_view(event, elev, azim, label):
         print(f"[ViewButton] clicked: {label}, elev={elev}, azim={azim}")
@@ -613,10 +613,10 @@ def _add_view_buttons(fig, ax):
         fig.canvas.draw_idle()
 
     def _toggle_projection(event):
-        if proj_mode["type"] == "persp":
-            proj_mode["type"] = "ortho"
-        else:
+        if proj_mode["type"] == "ortho":
             proj_mode["type"] = "persp"
+        else:
+            proj_mode["type"] = "ortho"
         try:
             ax.set_proj_type(proj_mode["type"])
             print(f"[ViewButton] projection toggled to {proj_mode['type']}")

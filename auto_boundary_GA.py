@@ -1,7 +1,7 @@
 """
-auto_boundary_GA.py — 遗传算法二维矩形排布（自动生成矩形边界）。
+auto_boundary_GA.py �? 遗传算法二维矩形排布（自动生成矩形边界）�?
 
-与 GA_layout.py 的核心区别：
+�? GA_layout.py 的核心区别：
   - 无需指定边界多边形，算法自动优化矩形边界 (W, H)
   - 适应度函数增加边界面积最小化目标
   - 边界尺寸作为染色体级基因参与进化
@@ -48,13 +48,13 @@ class Chromosome:
 # ---------------------------------------------------------------------------
 # 几何工具函数
 # ---------------------------------------------------------------------------
-# 遗传算法求解器 — 自动边界版
+# 遗传算法求解�? �? 自动边界�?
 # ---------------------------------------------------------------------------
 class AutoBoundaryGAPacker:
-    """遗传算法矩形排布，自动优化矩形边界尺寸。
+    """遗传算法矩形排布，自动优化矩形边界尺寸�?
 
-    输入只需矩形规格和障碍物，边界由算法自动寻优。
-    适应度 = 面积奖励 + 数量奖励 - 碰撞惩罚 - 角度惩罚 - 边界面积惩罚
+    输入只需矩形规格和障碍物，边界由算法自动寻优�?
+    适应�? = 面积奖励 + 数量奖励 - 碰撞惩罚 - 角度惩罚 - 边界面积惩罚
     """
 
     def __init__(
@@ -167,41 +167,105 @@ class AutoBoundaryGAPacker:
     def _is_rect_valid(
         self, rect: PlacedRect, already_kept: Sequence[PlacedRect], polygon: Sequence[Point]
     ) -> bool:
-        if not rect_inside_polygon(rect, polygon):
+        
+        # 1. 墙体净距限制 (1m)
+        # polygon 是四个点: [(0,0), (W,0), (W,H), (0,H)]
+        W = polygon[2][0]
+        H = polygon[2][1]
+        
+        # 构建一个向内收缩 1m 的虚拟安全边界
+        shrunk_polygon = [
+            (1.0, 1.0), 
+            (W - 1.0, 1.0), 
+            (W - 1.0, H - 1.0), 
+            (1.0, H - 1.0)
+        ]
+        # 使用内缩后的边界来判断：如果超出了安全区，说明离墙太近了，判违规！
+        if not rect_inside_polygon(rect, shrunk_polygon):
             return False
-        rp = rect.corners()
+        # 2. 设备间距限制 (1.2m)
+        # 将当前准备放进去的设备，长宽各放大 1.2m（相当于四周各弹出 0.6m 的气囊）
+        inflated_rect = PlacedRect(
+            id=rect.id, cx=rect.cx, cy=rect.cy,
+            width=rect.width + 1.2, height=rect.height + 1.2,  # 长宽增加 1.2
+            angle=rect.angle, mandatory=rect.mandatory
+        )
+        rp_inflated = inflated_rect.corners() # 提取气囊边界点
+
+        # 检查是否撞到承重柱/障碍物（这里保持原实体大小进行检测，如果你希望柱子也要有 1m 间距，就把 rect.corners() 换成 rp_inflated）
+        rp_original = rect.corners()
         for op in self._obstacle_polys:
-            if convex_overlap_strict(rp, op):
+            if convex_overlap_strict(rp_original, op):
                 return False
+
+        # 遍历检查之前已经放好的设备
         for other in already_kept:
-            if convex_overlap_strict(rp, other.corners()):
+            # 把已经放好的设备，同样长宽各放大 1.2m（四周各弹出 0.6m 的气囊）
+            inflated_other = PlacedRect(
+                id=other.id, cx=other.cx, cy=other.cy,
+                width=other.width + 1.2, height=other.height + 1.2, # 长宽增加 1.2
+                angle=other.angle, mandatory=other.mandatory
+            )
+            # 如果两个气囊发生了重叠，说明真实铁皮之间的距离小于了 1.2m，判违规！
+            if convex_overlap_strict(rp_inflated, inflated_other.corners()):
                 return False
+                
         return True
 
-    def _fitness(self, chromosome: Chromosome) -> float:
-        placed, polygon = self._decode(chromosome)
+    def _fitness(self, chrom: Chromosome) -> float:
+        placed, polygon = self._decode(chrom)
         area_reward = sum(r.area for r in placed)
         count_reward = 8.0 * len(placed)
         penalty = 0.0
 
-        for rect in placed:
-            rect_poly = rect.corners()
-            if not rect_inside_polygon(rect, polygon):
-                penalty += 520.0 + 6.0 * rect.area
-            for op in self._obstacle_polys:
-                if convex_overlap_strict(rect_poly, op):
-                    penalty += 760.0
-            penalty += self.angle_preference_weight * axis_alignment_deviation(rect.angle)
+        # 获取当前机房的宽和高
+        W = chrom.boundary_w
+        H = chrom.boundary_h
 
-        for i in range(len(placed)):
-            pi = placed[i].corners()
-            for j in range(i + 1, len(placed)):
-                pj = placed[j].corners()
-                if convex_overlap_strict(pi, pj):
-                    penalty += 900.0
+        # 1. 防止机房太小导致崩溃的底线保护
+        if W <= 2.0 or H <= 2.0:
+            penalty += 10000.0  # 扣一万分！
+        else:
+            # 2. 构建内缩 1m 的墙体安全边界
+            shrunk_polygon = [
+                (1.0, 1.0),
+                (W - 1.0, 1.0),
+                (W - 1.0, H - 1.0),
+                (1.0, H - 1.0)
+            ]
+            
+            for rect in placed:
+                # 越界检测：如果超出了安全边界（即靠墙小于 1m），给予重罚
+                if not rect_inside_polygon(rect, shrunk_polygon):
+                    penalty += 520.0 + 6.0 * rect.area
+                
+                # 柱子等固定障碍物检测（保持原尺寸）
+                rp_orig = rect.corners()
+                for op in self._obstacle_polys:
+                    if convex_overlap_strict(rp_orig, op):
+                        penalty += 760.0
+                
+                # 角度惩罚
+                penalty += self.angle_preference_weight * axis_alignment_deviation(rect.angle)
+
+            # 3. 设备间 1.2m 净距检测
+            # 提前构造放大 1.2m 的虚拟气囊，极大提升计算速度
+            inflated_list = []
+            for rect in placed:
+                inflated_list.append(PlacedRect(
+                    id=rect.id, cx=rect.cx, cy=rect.cy,
+                    width=rect.width + 1.2, height=rect.height + 1.2,
+                    angle=rect.angle, mandatory=rect.mandatory
+                ).corners())
+
+            # 气囊两两碰撞检测
+            for i in range(len(inflated_list)):
+                for j in range(i + 1, len(inflated_list)):
+                    if convex_overlap_strict(inflated_list[i], inflated_list[j]):
+                        penalty += 900.0  # 气囊碰撞即代表净距小于 1.2m，重罚！
 
         # ── 边界面积最小化惩罚 ──
-        boundary_area = chromosome.boundary_w * chromosome.boundary_h
+        boundary_area = W * H
         boundary_penalty = self.boundary_area_weight * boundary_area
         penalty += boundary_penalty
 
@@ -389,7 +453,7 @@ class AutoBoundaryGAPacker:
 
 
 # ---------------------------------------------------------------------------
-# 可视化 & SVG 导出
+# 可视�? & SVG 导出
 # ---------------------------------------------------------------------------
 def visualize_layout(
     polygon: Sequence[Point],
@@ -457,7 +521,7 @@ def visualize_layout(
     ax_layout.set_xlim(min(xs) - 2, max(xs) + 2)
     ax_layout.set_ylim(min(ys) - 2, max(ys) + 2)
     ax_layout.set_aspect("equal", adjustable="box")
-    ax_layout.set_title("Rectangle Layout — GA Auto-Boundary (Angles: multiples of 10°)")
+    ax_layout.set_title("Rectangle Layout �? GA Auto-Boundary (Angles: multiples of 10°)")
     ax_layout.set_xlabel("X")
     ax_layout.set_ylabel("Y")
     ax_layout.grid(True, alpha=0.2)

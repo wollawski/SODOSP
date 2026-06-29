@@ -81,7 +81,7 @@ def build_layout_config(best_combo):
         rectangles=[{"id": r.id, "width": r.width, "height": r.height, "mandatory": r.mandatory} for r in rectangles_2d],
         equipment=equipment_3d_configs,
         connections=connections,
-        ga_2d_kwargs={"population_size": 100, "generations": 200, "boundary_area_weight": 0.1}, 
+        ga_2d_kwargs={"population_size": 100, "generations": 200, "boundary_area_weight": 0.01}, 
         ga_3d_kwargs={"population_size": 100, "generations": 200}
     )
 
@@ -176,7 +176,7 @@ with col1:
     st.caption("单段风口设计物理尺寸: 1.0m x 0.2m")
 
 with col2:
-    st.subheader(" 3D 空间数字孪生可视化")
+    st.subheader("池区通风口3D示意图")
     
     # --- 3D 绘图渲染 ---
     plt.rcParams['font.sans-serif'] = ['SimHei']  
