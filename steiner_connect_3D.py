@@ -578,7 +578,7 @@ def visualize_3d(
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.set_title('3D Orthogonal Steiner Tree (GA) — Manhattan routing')
+    ax.set_title('3D Orthogonal Steiner Tree  — Manhattan routing')
     ax.set_box_aspect([1, 1, 0.6])
     _add_view_buttons(fig, ax)
     # ======== 新增代码：强制锁定物理真实比例，避免拉伸失真 ========
@@ -636,11 +636,11 @@ def _add_view_buttons(fig, ax):
             print("[ViewButton] projection toggle not supported by this matplotlib version.")
 
     button_defs = [
-        ("", 0.08, 0.05, 0.14, 0.06, 0.0, -90.0),
-        ("", 0.24, 0.05, 0.14, 0.06, 90.0, -90.0),
-        ("", 0.40, 0.05, 0.14, 0.06, 0.0, 0.0),
-        ("", 0.56, 0.05, 0.14, 0.06, 30.0, -45.0),
-        ("", 0.72, 0.05, 0.14, 0.06, None, None),
+        ("1", 0.08, 0.05, 0.14, 0.06, 0.0, -90.0),
+        ("2", 0.24, 0.05, 0.14, 0.06, 90.0, -90.0),
+        ("3", 0.40, 0.05, 0.14, 0.06, 0.0, 0.0),
+        ("4", 0.56, 0.05, 0.14, 0.06, 30.0, -45.0),
+        ("5", 0.72, 0.05, 0.14, 0.06, None, None),
     ]
 
     for label, x, y, w, h, elev, azim in button_defs:
@@ -697,7 +697,7 @@ def _draw_cuboid(ax, cb: Cuboid3D, color: str = "#A8DADC", alpha: float = 0.4):
 # Demo
 # ============================================================================
 def demo(visualize: bool = True, save_path: str | None = None, show_plot: bool = True) -> None:
-    print("=== 3D Orthogonal Steiner Tree Connection (GA) ===\n")
+    print("=== 3D Orthogonal Steiner Tree Connection  ===\n")
 
     cuboids = [
         Cuboid3D(id="A1", cx=3.50, cy=14.50, cz=1.50, width=5, depth=4, height=3.0, angle=0.0),
