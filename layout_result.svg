@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
+<rect width="100%" height="100%" fill="#FAFAFA"/>
+<polygon points="40.00,660.00 549.09,660.00 549.09,40.00 40.00,40.00" fill="#EEF7ED" stroke="#2D6A4F" stroke-width="2"/>
+<polygon points="816.40,-30.13 1161.47,-30.13 1161.47,-375.20 816.40,-375.20" fill="#6C757D" stroke="#212529" stroke-width="1.5"/>
+<polygon points="2024.14,-375.20 2455.47,-375.20 2455.47,-806.54 2024.14,-806.54" fill="#6C757D" stroke="#212529" stroke-width="1.5"/>
+<polygon points="2628.01,-1065.34 2886.81,-1065.34 2886.81,-1324.14 2628.01,-1324.14" fill="#6C757D" stroke="#212529" stroke-width="1.5"/>
+<polygon points="292.48,645.23 292.48,41.36 76.81,41.36 76.81,645.23" fill="#A8DADC" fill-opacity="0.72" stroke="#111" stroke-width="1.2"/>
+<text x="184.64" y="343.30" font-size="12" text-anchor="middle" dominant-baseline="central" fill="#111" font-weight="700">R1 90°</text>
+<polygon points="332.19,40.65 332.19,644.52 547.86,644.52 547.86,40.65" fill="#F4A261" fill-opacity="0.72" stroke="#111" stroke-width="1.2"/>
+<text x="440.02" y="342.59" font-size="12" text-anchor="middle" dominant-baseline="central" fill="#111" font-weight="700">R2 -90°</text>
+</svg>
