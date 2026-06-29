@@ -481,7 +481,7 @@ def demo(visualize: bool = True, save_path: str | None = None, show_plot: bool =
     polygon = [
         (0.0, 0.0),
         (42.0, 0.0),
-        (42.0, 32.0),
+        (38.0, 32.0),
         (0.0, 32.0),
     ]
 

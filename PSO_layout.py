@@ -567,7 +567,7 @@ def save_layout_svg(
 def demo(visualize: bool = True, save_path: str | None = None, show_plot: bool = True) -> None:
     polygon = [
         (0.0, 0.0),
-        (42.0, 2.0),
+        (10.0, 0.0),
         (38.0, 26.0),
         (24.0, 32.0),
         

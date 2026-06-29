@@ -3,3 +3,6 @@ __pycache__/
 auto_boundary_results/
 compare_results/
 *.pyc
+dist/智能泳池设计系统/
+build/
+智能泳池设计系统.spec

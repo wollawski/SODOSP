@@ -71,7 +71,7 @@ class AutoBoundaryPSOPacker:
         vmax_boundary_ratio: float = 0.10,
         angle_preference_weight: float = 50.0,
         boundary_area_weight: float = 0.5,
-        random_seed: int | None = 7,
+        random_seed: int | None = None,
     ) -> None:
         self.obstacles = list(obstacles)
         self.rectangles = list(rectangles)
