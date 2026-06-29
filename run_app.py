@@ -19,14 +19,14 @@ def main():
     # 物理防呆检查：如果没有正确复制 airscience 文件夹，直接拦截并提示
     if not os.path.exists(script_path):
         print("\n" + "="*50)
-        print(f"❌ 严重错误：找不到目标网页文件！\n预期路径: {script_path}")
-        print("💡 请确认你已经把源码中的 'airscience' 文件夹粘贴到了 .exe 旁边！")
+        print(f"严重错误：找不到目标网页文件！\n预期路径: {script_path}")
+        print("请确认你已经把源码中的 'airscience' 文件夹粘贴到了 .exe 旁边！")
         print("="*50 + "\n")
         input("按回车键退出...")
         return
 
-    print(f"✅ 成功找到网页文件: {script_path}")
-    print("🚀 正在启动后台暖通计算大脑，请稍候，浏览器即将打开...")
+    print(f"成功找到网页文件: {script_path}")
+    print(" 正在启动，请稍候，浏览器即将打开...")
     
     # 延迟导入 Streamlit，防止程序在启动初期就因依赖报错而瞬间闪退
     import streamlit.web.cli as stcli
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             traceback.print_exc(file=f)
             
         print("\n" + "="*50)
-        print("❌ 内部服务器启动失败！")
+        print("内部服务器启动失败！")
         print(f"详细报错代码已经写入到本地文件：{error_file}")
         print("你可以打开该 txt 文件查看，或将内容发给我分析。")
         print("="*50 + "\n")
