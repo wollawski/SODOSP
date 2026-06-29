@@ -81,7 +81,7 @@ def build_layout_config(best_combo):
         rectangles=[{"id": r.id, "width": r.width, "height": r.height, "mandatory": r.mandatory} for r in rectangles_2d],
         equipment=equipment_3d_configs,
         connections=connections,
-        ga_2d_kwargs={"population_size": 100, "generations": 200, "boundary_area_weight": 0.01}, 
+        ga_2d_kwargs={"population_size": 100, "generations": 200, "boundary_area_weight": 0.1}, 
         ga_3d_kwargs={"population_size": 100, "generations": 200}
     )
 

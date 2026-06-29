@@ -621,15 +621,15 @@ def demo(
     solver_config: AlgorithmConfig | None = None,
 ) -> None:
     obstacles = [
-        SquareObstacle(x=9.0, y=8.0, size=4.0),
-        SquareObstacle(x=23.0, y=12.0, size=5.0),
-        SquareObstacle(x=30.0, y=20.0, size=3.0),
+        #SquareObstacle(x=9.0, y=8.0, size=4.0),
+        #SquareObstacle(x=23.0, y=12.0, size=5.0),
+        #SquareObstacle(x=30.0, y=20.0, size=3.0),
     ]
 
     rectangles = [
-        RectangleSpec("R1", 7, 2.5, rotatable=True, mandatory=True),
-        RectangleSpec("R2", 7, 2.5, rotatable=True, mandatory=True),
-        
+        RectangleSpec("R1", 8, 2.8, rotatable=True, mandatory=True),
+        RectangleSpec("R2", 8, 2.8, rotatable=True, mandatory=True),
+        RectangleSpec("R3", 7.4, 2.3, rotatable=True, mandatory=True),
     ]
 
     solver_config = solver_config or AlgorithmConfig()

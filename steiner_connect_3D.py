@@ -581,6 +581,17 @@ def visualize_3d(
     ax.set_title('3D Orthogonal Steiner Tree (GA) — Manhattan routing')
     ax.set_box_aspect([1, 1, 0.6])
     _add_view_buttons(fig, ax)
+    # ======== 新增代码：强制锁定物理真实比例，避免拉伸失真 ========
+    x_limits = ax.get_xlim3d()
+    y_limits = ax.get_ylim3d()
+    z_limits = ax.get_zlim3d()
+    
+    x_range = abs(x_limits[1] - x_limits[0])
+    y_range = abs(y_limits[1] - y_limits[0])
+    z_range = abs(z_limits[1] - z_limits[0])
+    
+    # 设置 3D Box 的比例与实际数值的跨度一致
+    ax.set_box_aspect((x_range, y_range, z_range))
 
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
