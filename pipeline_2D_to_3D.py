@@ -20,7 +20,9 @@ import math
 import os
 import sys
 import time   # ======= 新增：用于测算算法速度 =======
+import random
 from typing import Dict, List, Optional, Sequence, Tuple
+
 
 from config import Equipment3DConfig, PipelineConfig
 
@@ -53,7 +55,7 @@ from steiner_connect_3D import (
 def run_2d_layout(
     rectangles: List[Rect2D],
     obstacles: List[SquareObstacle] | None = None,
-    seed: int = 42,
+    seed: int = None,
     algo: str = "auto",  # 默认为 auto 模式
     **layout_kwargs,
 ) -> Dict[str, object]:
@@ -94,10 +96,10 @@ def run_2d_layout(
 
     # 1. 手动指定模式
     if algo.lower() == "ga":
-        print("  [提示] 手动指定：使用 GA (遗传算法) 进行二维排布...")
+        print(f"  [提示] 手动指定：使用 GA (遗传算法) 进行二维排布...{seed}")
         return run_ga()
     elif algo.lower() == "pso":
-        print("  [提示] 手动指定：使用 PSO (粒子群) 进行二维排布...")
+        print(f"  [提示] 手动指定：使用 PSO (粒子群) 进行二维排布...{seed}")
         return run_pso()
     
     # 2. 自动赛马模式 (Auto)
@@ -190,7 +192,8 @@ def run_pipeline(
     layout_2d = run_2d_layout(
         rectangles=rectangles_2d,
         obstacles=obstacles,
-        seed=config.layout_seed,
+        seed=None,
+        #config.layout_seed
         algo=algo,  # ======= 新增：透传算法参数 =======
         **config.ga_2d_kwargs,
     )
@@ -291,25 +294,25 @@ def run_pipeline(
 def build_demo_config() -> Tuple[List[Rect2D], PipelineConfig]:
     """构建 demo 用的二维矩形列表和管道配置。"""
     rectangles = [
-        Rect2D("R1", 5, 4, rotatable=True, mandatory=True),
-        Rect2D("R2", 6, 4, rotatable=True, mandatory=True),
-        Rect2D("R3", 4, 3, rotatable=True, mandatory=False),
-        Rect2D("R4", 5, 5, rotatable=True, mandatory=False),
-        Rect2D("R5", 9, 3, rotatable=True, mandatory=False),
+        Rect2D("R1", 8, 2.8, rotatable=True, mandatory=True),
+        Rect2D("R2", 8, 2.8, rotatable=True, mandatory=True),
+        Rect2D("R3", 7.4, 2.3, rotatable=True, mandatory=True),
+        #Rect2D("R4", 5, 5, rotatable=True, mandatory=False),
+        #Rect2D("R5", 9, 3, rotatable=True, mandatory=False),
     ]
 
     config = PipelineConfig(
         rectangles=[
-            {"id": "R1", "width": 5, "height": 4, "rotatable": True, "mandatory": True},
-            {"id": "R2", "width": 6, "height": 4, "rotatable": True, "mandatory": True},
-            {"id": "R3", "width": 4, "height": 3, "rotatable": True, "mandatory": False},
-            {"id": "R4", "width": 5, "height": 5, "rotatable": True, "mandatory": False},
-            {"id": "R5", "width": 9, "height": 3, "rotatable": True, "mandatory": False},
+            {"id": "R1", "width": 8, "height": 2.8, "rotatable": True, "mandatory": True},
+            {"id": "R2", "width": 8, "height": 2.8, "rotatable": True, "mandatory": True},
+            {"id": "R3", "width": 7.4, "height": 2.3, "rotatable": True, "mandatory": True},
+            #{"id": "R4", "width": 5, "height": 5, "rotatable": True, "mandatory": False},
+            #{"id": "R5", "width": 9, "height": 3, "rotatable": True, "mandatory": False},
         ],
         equipment=[
             Equipment3DConfig(
                 rect_id="R1",
-                height=3.0,
+                height=2.8,
                 ports=[
                     {"id": "P1_in",  "face": "top",   "u": 0.3, "v": 0.5},
                     {"id": "P1_out", "face": "right",  "u": 0.5, "v": 0.5},
@@ -317,7 +320,7 @@ def build_demo_config() -> Tuple[List[Rect2D], PipelineConfig]:
             ),
             Equipment3DConfig(
                 rect_id="R2",
-                height=3.0,
+                height=2.8,
                 ports=[
                     {"id": "P2_in",  "face": "top",    "u": 0.5, "v": 0.7},
                     {"id": "P2_out", "face": "left",   "u": 0.5, "v": 0.5},
@@ -331,6 +334,7 @@ def build_demo_config() -> Tuple[List[Rect2D], PipelineConfig]:
                     {"id": "P3_out", "face": "back",   "u": 0.5, "v": 0.5},
                 ],
             ),
+            '''
             Equipment3DConfig(
                 rect_id="R4",
                 height=3.5,
@@ -346,13 +350,13 @@ def build_demo_config() -> Tuple[List[Rect2D], PipelineConfig]:
                     {"id": "P5_in",  "face": "top",    "u": 0.5, "v": 0.5},
                     {"id": "P5_out", "face": "left",   "u": 0.5, "v": 0.5},
                 ],
-            ),
+            ),'''
         ],
         connections=[
-            ["P1_in",  "P2_in",  "P3_in",  "P4_in",  "P5_in"],
-            ["P1_out", "P2_out", "P3_out", "P4_out", "P5_out"],
+            ["P1_in",  "P2_in",  "P3_in" ],
+            ["P1_out", "P2_out", "P3_out"],
         ],
-        layout_seed=42,
+        layout_seed=4,
         ga_2d_kwargs={
             "population_size": 100,
             "generations": 250,

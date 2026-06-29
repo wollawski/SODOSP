@@ -118,6 +118,36 @@ class AutoBoundaryPSOPacker:
         # 额外 2 维: boundary_w, boundary_h
         self.dim = len(self.rectangles) * 4 + 2
 
+        # --- 新增：距离约束配置 ---
+        self.WALL_BUFFER = 1.0
+        self.OBJ_BUFFER = 0.6  # 两个 0.6m 相加等于 1.2m
+        
+        # 预处理障碍物：将其膨胀以便进行 1.2m 净距检查
+        self._buffered_obstacle_polys = []
+        for o in self.obstacles:
+            # 假设 SquareObstacle 是轴对齐的，直接扩大尺寸
+            # 如果 Obstacle 类支持 buffer 方法更好，这里采用简单扩大坐标的方法
+            buffered_poly = [
+                (o.x - self.OBJ_BUFFER, o.y - self.OBJ_BUFFER),
+                (o.x + o.size + self.OBJ_BUFFER, o.y - self.OBJ_BUFFER),
+                (o.x + o.size + self.OBJ_BUFFER, o.y + o.size + self.OBJ_BUFFER),
+                (o.x - self.OBJ_BUFFER, o.y + self.OBJ_BUFFER)
+            ]
+            self._buffered_obstacle_polys.append(buffered_poly)
+
+    def _get_buffered_rect(self, rect: PlacedRect, buffer: float) -> PlacedRect:
+        """返回一个尺寸膨胀了 buffer * 2 的虚拟矩形。"""
+        # 创建一个临时对象，模拟膨胀后的几何轮廓
+        return PlacedRect(
+            id=rect.id,
+            cx=rect.cx,
+            cy=rect.cy,
+            width=rect.width + 2 * buffer,
+            height=rect.height + 2 * buffer,
+            angle=rect.angle,
+            mandatory=rect.mandatory,
+        )
+    
     def _inertia(self, t: int) -> float:
         return self.w_start - (self.w_start - self.w_end) * (t / max(self.iterations - 1, 1))
 
@@ -218,15 +248,24 @@ class AutoBoundaryPSOPacker:
     def _is_rect_valid(
         self, rect: PlacedRect, already_kept: Sequence[PlacedRect], polygon: Sequence[Point]
     ) -> bool:
-        if not rect_inside_polygon(rect, polygon):
+        # 1. 检查墙距：将矩形膨胀 1.0m，检查其是否仍在边界内
+        wall_check_rect = self._get_buffered_rect(rect, self.WALL_BUFFER)
+        if not rect_inside_polygon(wall_check_rect, polygon):
             return False
-        rp = rect.corners()
-        for op in self._obstacle_polys:
+            
+        # 2. 检查障碍物距离：膨胀矩形 0.6m，检查是否与膨胀后的障碍物碰撞
+        rect_for_obj_check = self._get_buffered_rect(rect, self.OBJ_BUFFER)
+        rp = rect_for_obj_check.corners()
+        for op in self._buffered_obstacle_polys:
             if convex_overlap_strict(rp, op):
                 return False
+                
+        # 3. 检查其他机组距离：膨胀矩形 0.6m，检查是否与其他膨胀后的机组碰撞
         for other in already_kept:
-            if convex_overlap_strict(rp, other.corners()):
+            other_for_check = self._get_buffered_rect(other, self.OBJ_BUFFER)
+            if convex_overlap_strict(rp, other_for_check.corners()):
                 return False
+                
         return True
 
     # ------------------------------------------------------------------
@@ -237,6 +276,29 @@ class AutoBoundaryPSOPacker:
         area_reward = sum(r.area for r in placed)
         count_reward = 8.0 * len(placed)
         penalty = 0.0
+
+        # ── 边界与间距惩罚 ──
+        for rect in placed:
+            # 墙距惩罚
+            wall_rect = self._get_buffered_rect(rect, self.WALL_BUFFER)
+            if not rect_inside_polygon(wall_rect, polygon):
+                penalty += 1000.0  # 增加墙距违规的惩罚权重
+            
+            # 障碍物距离惩罚
+            rect_obj = self._get_buffered_rect(rect, self.OBJ_BUFFER)
+            rp = rect_obj.corners()
+            for op in self._buffered_obstacle_polys:
+                if convex_overlap_strict(rp, op):
+                    penalty += 1500.0
+            
+            penalty += self.angle_preference_weight * axis_alignment_deviation(rect.angle)
+
+        for i in range(len(placed)):
+            pi = self._get_buffered_rect(placed[i], self.OBJ_BUFFER).corners()
+            for j in range(i + 1, len(placed)):
+                pj = self._get_buffered_rect(placed[j], self.OBJ_BUFFER).corners()
+                if convex_overlap_strict(pi, pj):
+                    penalty += 1500.0 # 增加机组间距违规的惩罚权重
 
         for rect in placed:
             rect_poly = rect.corners()

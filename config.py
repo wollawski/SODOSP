@@ -120,7 +120,7 @@ class PipelineConfig:
     rectangles: List[Dict[str, Any]] = field(default_factory=list)
     equipment: List[Equipment3DConfig] = field(default_factory=list)
     connections: List[List[str]] = field(default_factory=list)
-    layout_seed: int = 42
+    layout_seed: int = None
     ga_2d_kwargs: Dict[str, Any] = field(default_factory=dict)
     ga_3d_kwargs: Dict[str, Any] = field(default_factory=dict)
 

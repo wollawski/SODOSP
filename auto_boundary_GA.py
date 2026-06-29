@@ -69,7 +69,7 @@ class AutoBoundaryGAPacker:
         tournament_size: int = 3,
         angle_preference_weight: float = 50.0,
         boundary_area_weight: float = 0.5,
-        random_seed: int | None = 20,
+        random_seed: int | None = None,
     ) -> None:
         self.obstacles = list(obstacles)
         self.rectangles = list(rectangles)
